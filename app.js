@@ -523,3 +523,131 @@ async function initAll() {
 }
 
 document.addEventListener("DOMContentLoaded", initAll);
+
+
+
+
+
+
+
+/* ==============================
+   FORM (문의 양식) + CALC (견적 계산기)
+============================== */
+(() => {
+  const toNum = (v, fallback = 0) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : fallback;
+  };
+
+  const getActiveExtraLabels = () => {
+    const chips = document.querySelectorAll("#extraToggles .chip");
+    const labels = [];
+
+    for (const c of chips) {
+      if (!c.classList.contains("is-active")) continue;
+      const t = (c.getAttribute("data-extra") || c.textContent || "").trim();
+      if (t) labels.push(t);
+    }
+
+    const rush = labels.filter((l) => l === "빠른 마감" || l === "우선 마감");
+    if (rush.length > 1) {
+      return labels
+        .filter((l) => !(l === "빠른 마감" || l === "우선 마감"))
+        .concat(rush[rush.length - 1]);
+    }
+
+    return labels;
+  };
+
+  const getExtraDef = (label) => {
+    if (!Array.isArray(EXTRA)) return null;
+    return EXTRA.find((e) => String(e.label || "").trim() === String(label || "").trim()) || null;
+  };
+
+  const getRawKey = () => String(document.getElementById("rawMin")?.value || "").trim();
+
+  const getFinalMin = () => {
+    const n = Math.floor(toNum(document.getElementById("finalMin")?.value, 0));
+    return Math.max(0, n);
+  };
+
+  const getMomentCount = () => {
+    const el = document.getElementById("momentVal");
+    const n = Math.floor(toNum(el?.value, 0));
+    return Math.max(0, n);
+  };
+
+  const getCollabCount = () => {
+    const el = document.getElementById("collabVal");
+    const n = Math.floor(toNum(el?.value, 1));
+    return Math.max(1, n);
+  };
+
+  window.computeTotal = function computeTotal() {
+    const notice = document.getElementById("noticeText");
+
+    const rawKey = getRawKey();
+    const finalMin = getFinalMin();
+    const pkg = document.getElementById("package")?.value;
+    const editPoint = document.getElementById("editPoint")?.value;
+
+    if (
+      !Array.isArray(RAW_BASE) || !RAW_BASE.length ||
+      !Array.isArray(PRICE_MIN) || !PRICE_MIN.length ||
+      !Array.isArray(EXTRA) || !EXTRA.length
+    ) {
+      if (notice) notice.textContent = "※ 계산 시트 데이터가 아직 연결되지 않았습니다.";
+      return { ok: false, total: 0, reason: "no_data" };
+    }
+
+    if (!rawKey || rawKey === "__inquiry__") {
+      if (notice) notice.textContent = "※ 원본 영상 길이가 150분 이상인 경우, 별도 문의가 필요합니다.";
+      return { ok: false, total: 0, reason: "inquiry" };
+    }
+
+    const base = (typeof findBasePriceByLabel === "function") ? findBasePriceByLabel(rawKey) : null;
+    if (base === null || !Number.isFinite(base)) {
+      if (notice) notice.textContent = "※ 원본 영상 길이 정보를 불러오지 못했습니다.";
+      return { ok: false, total: 0, reason: "base_missing" };
+    }
+
+    const perMin = (typeof findPricePerMin === "function") ? findPricePerMin(pkg, editPoint) : null;
+    if (perMin === null || !Number.isFinite(perMin)) {
+      if (notice) notice.textContent = "※ 단가 정보를 불러오지 못했습니다.";
+      return { ok: false, total: 0, reason: "rate_missing" };
+    }
+
+    if (notice) notice.textContent = "";
+
+    const work = finalMin * perMin;
+
+    const momentCount = getMomentCount();
+    const momentDef = getExtraDef("시점 추가");
+    const momentUnit = momentDef && momentDef.type === "add" ? toNum(momentDef.value, 30000) : 30000;
+    const momentAdd = momentCount * momentUnit;
+
+    const collabCount = getCollabCount();
+    const extraPeople = Math.max(0, collabCount - 3);
+    const collabDef = getExtraDef("합방 인원 추가");
+    const collabUnit = collabDef && collabDef.type === "per_min" ? toNum(collabDef.value, 2000) : 2000;
+    const collabAdd = finalMin * collabUnit * extraPeople;
+
+    const S = base + work + momentAdd + collabAdd;
+
+    const actives = getActiveExtraLabels();
+
+    let addRate = 0;
+    for (const label of actives) {
+      const def = getExtraDef(label);
+      if (!def) continue;
+      if (String(def.type).trim() !== "mult") continue;
+
+      const m = toNum(def.value, 1);
+      if (m > 1) addRate += (m - 1);
+    }
+
+    const total = S * (1 + addRate);
+
+    return { ok: true, total };
+  };
+})();
