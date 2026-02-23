@@ -842,3 +842,31 @@ input[type="number"]{
 #form {
     margin-bottom: 20px;
 }
+
+.formSelect,
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    background: #fff2c9;
+    padding-right: 36px;
+    position: relative;
+}
+
+.formSelect,
+select {
+    background-image: none;
+}
+
+.formSelect::after,
+select::after {
+    content: "▼";
+    font-size: 11px;
+    color: #664b2e;
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
