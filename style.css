@@ -838,3 +838,7 @@ input[type="number"]{
           box-shadow: 0 0 0px 1000px #fff2c9 inset;
   transition: background-color 9999s ease-out 0s;
 }
+
+#form {
+    margin-bottom: 20px;
+}
