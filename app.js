@@ -283,7 +283,6 @@ function computeTotal() {
   }
 
   if (!rawKey || rawKey === "__inquiry__") {
-    if (notice) notice.textContent = "※ 원본 영상 길이가 150분 이상인 경우, 별도 문의가 필요합니다.";
     return { ok: false, total: 0, reason: "inquiry" };
   }
 
