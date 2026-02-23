@@ -1,17 +1,36 @@
-/* ==============================
-   STATUS
-============================== */
 const STATUS_CSV_URL =
   "https://docs.google.com/spreadsheets/d/e/2PACX-1vRuo_mCcH60Tbh6aZlV-i8tnaSbTBnwOv-WJqt2ixVGvbSXmFe8g9i4RFlJ51q7pLO791n_39iQRLXN/pub?gid=0&single=true&output=csv";
+
+const RAW_BASE_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRuo_mCcH60Tbh6aZlV-i8tnaSbTBnwOv-WJqt2ixVGvbSXmFe8g9i4RFlJ51q7pLO791n_39iQRLXN/pub?gid=926551920&single=true&output=csv";
+const PRICE_MIN_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRuo_mCcH60Tbh6aZlV-i8tnaSbTBnwOv-WJqt2ixVGvbSXmFe8g9i4RFlJ51q7pLO791n_39iQRLXN/pub?gid=1575211476&single=true&output=csv";
+const EXTRA_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRuo_mCcH60Tbh6aZlV-i8tnaSbTBnwOv-WJqt2ixVGvbSXmFe8g9i4RFlJ51q7pLO791n_39iQRLXN/pub?gid=1808152056&single=true&output=csv";
+const SHORTFORM_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRuo_mCcH60Tbh6aZlV-i8tnaSbTBnwOv-WJqt2ixVGvbSXmFe8g9i4RFlJ51q7pLO791n_39iQRLXN/pub?gid=2033236241&single=true&output=csv";
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-/** parser **/
+function toInt(v, fallback = 0) {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.floor(n) : fallback;
+}
+
+function formatKRW(n) {
+  const num = Number(n);
+  if (!Number.isFinite(num)) return "0원";
+  return Math.round(num).toLocaleString("ko-KR") + "원";
+}
+
 function parseCSVToKV(csvText) {
   const cleaned = String(csvText ?? "").replace(/^\uFEFF/, "").trim();
-  const lines = cleaned.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const lines = cleaned
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
   if (lines.length < 2) return {};
 
   const header = lines[0].toLowerCase();
@@ -24,29 +43,18 @@ function parseCSVToKV(csvText) {
     const cols = line
       .split(",")
       .map((s) => s.trim().replace(/^"|"$/g, ""));
-
     const key = cols[0];
     const value = cols[1] ?? "";
-
     if (key) kv[key] = value;
   }
   return kv;
 }
 
-/** normalize **/
 function normalizeBool(v) {
   const s = String(v ?? "").trim().toUpperCase();
-  return (
-    s === "TRUE" ||
-    s === "T" ||
-    s === "YES" ||
-    s === "Y" ||
-    s === "1" ||
-    s === "ON"
-  );
+  return s === "TRUE" || s === "T" || s === "YES" || s === "Y" || s === "1" || s === "ON";
 }
 
-/** renderStatus **/
 function renderStatus(state) {
   const optOpen = document.getElementById("optOpen");
   const optClosed = document.getElementById("optClosed");
@@ -68,19 +76,14 @@ function renderStatus(state) {
   }
 }
 
-/** fetch **/
 async function fetchTextWithRetry(url, retries = 2) {
   let lastErr = null;
-
   for (let i = 0; i <= retries; i++) {
     try {
       const bust = `${url}${url.includes("?") ? "&" : "?"}t=${Date.now()}`;
-
       const res = await fetch(bust, { cache: "no-store" });
       if (!res.ok) throw new Error("HTTP " + res.status);
-
-      const txt = await res.text();
-      return txt;
+      return await res.text();
     } catch (e) {
       lastErr = e;
       await sleep(200);
@@ -89,7 +92,6 @@ async function fetchTextWithRetry(url, retries = 2) {
   throw lastErr;
 }
 
-/** loadStatus **/
 async function loadStatus() {
   try {
     const csv = await fetchTextWithRetry(STATUS_CSV_URL, 2);
@@ -108,39 +110,15 @@ async function loadStatus() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", loadStatus);
-
-
-
-
-
-
-
-const RAW_BASE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRuo_mCcH60Tbh6aZlV-i8tnaSbTBnwOv-WJqt2ixVGvbSXmFe8g9i4RFlJ51q7pLO791n_39iQRLXN/pub?gid=926551920&single=true&output=csv";
-const PRICE_MIN_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRuo_mCcH60Tbh6aZlV-i8tnaSbTBnwOv-WJqt2ixVGvbSXmFe8g9i4RFlJ51q7pLO791n_39iQRLXN/pub?gid=1575211476&single=true&output=csv";
-const EXTRA_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRuo_mCcH60Tbh6aZlV-i8tnaSbTBnwOv-WJqt2ixVGvbSXmFe8g9i4RFlJ51q7pLO791n_39iQRLXN/pub?gid=1808152056&single=true&output=csv";
-const SHORTFORM_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRuo_mCcH60Tbh6aZlV-i8tnaSbTBnwOv-WJqt2ixVGvbSXmFe8g9i4RFlJ51q7pLO791n_39iQRLXN/pub?gid=2033236241&single=true&output=csv";
-
-function sleep(ms) {
-  return new Promise((r) => setTimeout(r, ms));
-}
-
-function toInt(v, fallback = 0) {
-  const n = Number(v);
-  return Number.isFinite(n) ? Math.floor(n) : fallback;
-}
-
-function formatKRW(n) {
-  const num = Number(n);
-  if (!Number.isFinite(num)) return "0원";
-  return Math.round(num).toLocaleString("ko-KR") + "원";
-}
-
 function parseCSV(text) {
   const cleaned = String(text ?? "").replace(/^\uFEFF/, "").trim();
   const lines = cleaned.split(/\r?\n/).filter(Boolean);
   if (!lines.length) return [];
-  const headers = lines[0].split(",").map((s) => s.trim().replace(/^"|"$/g, ""));
+
+  const headers = lines[0]
+    .split(",")
+    .map((s) => s.trim().replace(/^"|"$/g, ""));
+
   const rows = [];
   for (const line of lines.slice(1)) {
     const cols = line.split(",").map((s) => s.trim().replace(/^"|"$/g, ""));
@@ -172,6 +150,35 @@ let RAW_BASE = [];
 let PRICE_MIN = [];
 let EXTRA = [];
 let SHORTFORM = [];
+
+function renderRawRangeOptions() {
+  const sel = document.getElementById("rawMin");
+  if (!sel) return;
+  if (sel.tagName !== "SELECT") return;
+
+  const current = sel.value || "";
+  sel.innerHTML = "";
+
+  const first = document.createElement("option");
+  first.value = "";
+  first.textContent = "구간 선택";
+  sel.appendChild(first);
+
+  for (const r of RAW_BASE) {
+    const label = String(r.label || "").trim();
+    if (!label) continue;
+
+    const isInquiry =
+      !Number.isFinite(r.base_price) || r.base_price <= 0 || label.includes("150") || label.includes("문의");
+
+    const opt = document.createElement("option");
+    opt.value = isInquiry ? "__inquiry__" : label;
+    opt.textContent = label;
+    sel.appendChild(opt);
+  }
+
+  if (current) sel.value = current;
+}
 
 async function loadCalcData() {
   if (!RAW_BASE_URL || !PRICE_MIN_URL || !EXTRA_URL) return;
@@ -206,11 +213,12 @@ async function loadCalcData() {
       base_price: toInt(r.base_price),
     }));
   }
+
+  renderRawRangeOptions();
 }
 
-function findBasePrice(rawMin) {
-  const rawSec = rawMin * 60;
-  const row = RAW_BASE.find((r) => rawSec >= r.min_sec && rawSec <= r.max_sec);
+function findBasePriceByLabel(label) {
+  const row = RAW_BASE.find((r) => r.label === label);
   return row ? row.base_price : null;
 }
 
@@ -223,8 +231,11 @@ function findPricePerMin(pkg, editPoint) {
   return row ? row.price_per_min : null;
 }
 
-function getExtraDef(label) {
-  return EXTRA.find((e) => e.label === label) || null;
+function getSelectedText(selectId) {
+  const sel = document.getElementById(selectId);
+  if (!sel || sel.tagName !== "SELECT") return "";
+  const opt = sel.options?.[sel.selectedIndex];
+  return (opt?.textContent || "").trim();
 }
 
 function getActiveExtraLabels() {
@@ -232,61 +243,54 @@ function getActiveExtraLabels() {
   const labels = [];
   for (const c of chips) {
     if (c.classList.contains("is-active")) {
-      labels.push(c.getAttribute("data-extra") || c.textContent.trim());
+      labels.push(c.getAttribute("data-extra") || (c.textContent || "").trim());
     }
   }
-  const rush = labels.filter((l) => l === "빠른 마감" || l === "우선 마감");
-  if (rush.length > 1) {
-    return labels
-      .filter((l) => !(l === "빠른 마감" || l === "우선 마감"))
-      .concat(rush[rush.length - 1]);
-  }
-  return labels;
-}
 
-function getActiveCollabCount() {
-  const chips = document.querySelectorAll("#collabBtns .chip");
-  for (const c of chips) {
-    if (c.classList.contains("is-active")) {
-      return toInt(c.getAttribute("data-collab"), 0);
-    }
+  const allow = new Set(["포트폴리오 비공개", "빠른 마감", "우선 마감"]);
+  const filtered = labels.filter((l) => allow.has(l));
+
+  const rush = filtered.filter((l) => l === "빠른 마감" || l === "우선 마감");
+  if (rush.length > 1) {
+    return filtered.filter((l) => !(l === "빠른 마감" || l === "우선 마감")).concat(rush[rush.length - 1]);
   }
-  return 0;
+  return filtered;
 }
 
 function getMomentCount() {
   const el = document.getElementById("momentVal");
-  return toInt(el?.value, 0);
+  if (!el) return 0;
+  return Math.max(0, toInt(el.value, 0));
 }
 
-function setMomentCount(n) {
-  const v = Math.max(0, Math.min(99, toInt(n, 0)));
-  const el = document.getElementById("momentVal");
-  if (el) el.value = String(v);
-}
-
-function setMomentCount(n) {
-  const v = Math.max(0, Math.min(99, toInt(n, 0)));
-  const el = document.getElementById("momentVal");
-  if (el) el.textContent = String(v);
+function getCollabCount() {
+  const el = document.getElementById("collabVal");
+  if (!el) return 1;
+  return Math.max(1, toInt(el.value, 1));
 }
 
 function computeTotal() {
   const notice = document.getElementById("noticeText");
-  const rawMin = toInt(document.getElementById("rawMin")?.value, 0);
+  const rawSel = document.getElementById("rawMin");
+  const rawKey = rawSel ? String(rawSel.value || "").trim() : "";
   const finalMin = toInt(document.getElementById("finalMin")?.value, 0);
   const pkg = document.getElementById("package")?.value;
   const editPoint = document.getElementById("editPoint")?.value;
 
-  if (!RAW_BASE.length || !PRICE_MIN.length || !EXTRA.length) {
+  if (!RAW_BASE.length || !PRICE_MIN.length) {
     if (notice) notice.textContent = "※ 계산 시트 URL이 아직 연결되지 않았습니다.";
     return { ok: false, total: 0, reason: "no_data" };
   }
 
-  const base = findBasePrice(rawMin);
-  if (base === null) {
+  if (!rawKey || rawKey === "__inquiry__") {
     if (notice) notice.textContent = "※ 원본 영상 길이가 150분 이상인 경우, 별도 문의가 필요합니다.";
     return { ok: false, total: 0, reason: "inquiry" };
+  }
+
+  const base = findBasePriceByLabel(rawKey);
+  if (base === null) {
+    if (notice) notice.textContent = "※ 원본 영상 길이 정보를 불러오지 못했습니다.";
+    return { ok: false, total: 0, reason: "base_missing" };
   }
 
   const perMin = findPricePerMin(pkg, editPoint);
@@ -297,194 +301,118 @@ function computeTotal() {
 
   if (notice) notice.textContent = "";
 
-  const work = finalMin * perMin;
-  const activeExtraLabels = getActiveExtraLabels();
-  const collabAddCount = getActiveCollabCount();
   const momentCount = getMomentCount();
+  const collabCount = getCollabCount();
+  const extraLabels = getActiveExtraLabels();
 
-  let addFixed = 0;
-  let addPerMin = 0;
-  let mults = [];
+  const work = finalMin * perMin;
 
-  for (const label of activeExtraLabels) {
-    const def = getExtraDef(label);
-    if (!def) continue;
+  const momentAdd = momentCount * 30000;
 
-    if (def.type === "add") {
-      addFixed += Number(def.value) || 0;
-    } else if (def.type === "mult") {
-      mults.push(Number(def.value) || 1);
-    } else if (def.type === "per_min") {
-      if (label === "합방 인원 추가") {
-        addPerMin += finalMin * (Number(def.value) || 0) * collabAddCount;
-      } else {
-        addPerMin += finalMin * (Number(def.value) || 0);
-      }
-    }
+  let collabAdd = 0;
+  if (collabCount >= 4) {
+    const extraPeople = collabCount - 3;
+    collabAdd = finalMin * 2000 * extraPeople;
   }
 
-  const momentDef = getExtraDef("시점 추가");
-  if (momentDef && momentDef.type === "add") {
-    addFixed += (Number(momentDef.value) || 0) * momentCount;
+  let subtotal = base + work + momentAdd + collabAdd;
+
+  if (extraLabels.length) {
+    subtotal = subtotal * 1.5;
   }
 
-  let subtotal = base + work + addFixed + addPerMin;
-  let multExtra = 0;
-
-  for (const m of mults) {
-    if (m > 1) multExtra += subtotal * (m - 1);
-  }
-
-  return { ok: true, total: subtotal + multExtra };
+  return { ok: true, total: subtotal };
 }
 
-
-function getSelectedText(selectId) {
-  const sel = document.getElementById(selectId);
-  if (!sel) return "";
-  const opt = sel.options?.[sel.selectedIndex];
-  return (opt?.textContent || "").trim();
-}
-
-function syncCalcToForm() {
-  const fFinalLen = document.getElementById("fFinalLen");
-  const fEtc = document.getElementById("fEtc");
-  if (!fFinalLen && !fEtc) return;
-
-  const rawMin = toInt(document.getElementById("rawMin")?.value, 0);
+function buildCalcSummaryBlock() {
+  const rawLabel = getSelectedText("rawMin") || "-";
   const finalMin = toInt(document.getElementById("finalMin")?.value, 0);
+  const pkgText = getSelectedText("package") || "-";
+  const editText = getSelectedText("editPoint") || "-";
 
-  if (fFinalLen && finalMin > 0) {
-    fFinalLen.value = `${finalMin}분`;
-  }
-
-  // 요약문은 '그 외 요구사항' 하단에 자동 첨부 (기존 내용은 유지)
-  if (!fEtc) return;
-
-  const pkgText = getSelectedText("package");
-  const editText = getSelectedText("editPoint");
   const extras = getActiveExtraLabels();
-  const collab = getActiveCollabCount();
+  const collab = getCollabCount();
   const moment = getMomentCount();
 
   const totalText = (document.getElementById("totalText")?.textContent || "").trim();
 
   const extraLines = [];
-  if (extras.length) extraLines.push(`- 추가금: ${extras.join(", ")}`);
-  if (collab > 0) extraLines.push(`- 합방 인원 추가: ${collab}명`);
-  if (moment > 0) extraLines.push(`- 시점 추가: ${moment}회`);
+  if (extras.length) extraLines.push(`- 추가금(일괄 +50%): ${extras.join(", ")}`);
+  else extraLines.push(`- 추가금: 없음`);
 
-  const summary =
-`[견적 계산기 입력 요약]
-- 원본 영상 길이: ${rawMin || 0}분
-- 희망 영상 길이: ${finalMin || 0}분
-- 희망 타입: ${pkgText || "-"}
-- 편집점: ${editText || "-"}
-${extraLines.length ? extraLines.join("\n") : "- 추가 항목: 없음"}
-- 예상 총액: ${totalText || "0원"}`;
+  extraLines.push(`- 시점: ${moment || 0}개 (1개당 30,000원)`);
+  extraLines.push(
+    `- 합방 인원: ${collab || 1}명 (${collab >= 4 ? `4명부터 1인당 분당 2,000원 적용` : "1~3명 추가금 없음"})`
+  );
 
-  const markerStart = "[견적 계산기 입력 요약]";
-  const markerIdx = fEtc.value.indexOf(markerStart);
-
-  if (markerIdx >= 0) {
-    fEtc.value = fEtc.value.slice(0, markerIdx).trimEnd() + "\n\n" + summary;
-  } else {
-    const base = fEtc.value.trim();
-    fEtc.value = (base ? base + "\n\n" : "") + summary;
-  }
+  return (
+    `[견적 계산기 입력 요약]\n` +
+    `- 원본 영상 길이: ${rawLabel}\n` +
+    `- 희망 영상 길이: ${finalMin || 0}분\n` +
+    `- 희망 타입: ${pkgText}\n` +
+    `- 편집점: ${editText}\n` +
+    `${extraLines.join("\n")}\n` +
+    `- 예상 총액: ${totalText || "0원"}`
+  );
 }
 
+function upsertCalcSummaryIntoEtc(etcText) {
+  const summary = buildCalcSummaryBlock();
+  const markerStart = "[견적 계산기 입력 요약]";
+  const idx = String(etcText || "").indexOf(markerStart);
+
+  if (idx >= 0) {
+    const head = String(etcText || "").slice(0, idx).trimEnd();
+    return (head ? head + "\n\n" : "") + summary;
+  }
+
+  const base = String(etcText || "").trim();
+  return (base ? base + "\n\n" : "") + summary;
+}
+
+function syncCalcToForm() {
+  return;
+}
 
 /* ==============================
    FORM (문의 양식) + CALC (견적 계산기)
 ============================== */
-function getVal(id) {
-  const el = document.getElementById(id);
-  if (!el) return "";
-  return (el.value ?? el.textContent ?? "").toString().trim();
-}
-
-function getActiveChips(containerId) {
-  const root = document.getElementById(containerId);
-  if (!root) return [];
-  return [...root.querySelectorAll(".chip.is-active")];
-}
-
-function getSelectLabel(id) {
-  const el = document.getElementById(id);
-  if (!el || el.tagName !== "SELECT") return getVal(id);
-  const opt = el.options?.[el.selectedIndex];
-  return (opt?.textContent || opt?.value || "").trim();
-}
-
-function buildCalcSummaryText() {
-  const rawMin = getVal("rawMin");
-  const finalMin = getVal("finalMin");
-  const pkgLabel = getSelectLabel("package");
-  const editPointLabel = getSelectLabel("editPoint");
-
-  const momentVal = (() => {
-    const n = parseInt(getVal("momentVal"), 10);
-    return Number.isFinite(n) ? n : 0;
-  })();
-
-  const extraChips = getActiveChips("extraToggles")
-    .map((chip) => (chip.getAttribute("data-extra") || chip.textContent || "").trim())
-    .filter(Boolean);
-
-  const collabChip = getActiveChips("collabBtns")[0];
-  const collab = (collabChip?.getAttribute("data-collab") || collabChip?.textContent || "").trim();
-
-  const totalText = (document.getElementById("totalText")?.textContent || "").trim();
-  const noticeText = (document.getElementById("noticeText")?.textContent || "").trim();
-
-  const lines = [];
-  lines.push("[견적 계산기 입력 내용]");
-  lines.push("");
-  lines.push(`원본 영상 길이: ${rawMin ? `${rawMin}분` : "-"}`);
-  lines.push(`희망 영상 길이: ${finalMin ? `${finalMin}분` : "-"}`);
-  lines.push(`희망 타입: ${pkgLabel || "-"}`);
-  lines.push(`편집점: ${editPointLabel || "-"}`);
-  lines.push(`시점(+): ${momentVal}`);
-  lines.push(`합방 인원 추가: ${collab || "-"}`);
-
-  if (extraChips.length) {
-    lines.push("추가금 항목:");
-    extraChips.forEach((t) => lines.push(`- ${t}`));
-  } else {
-    lines.push("추가금 항목: -");
-  }
-
-  lines.push("");
-  lines.push(`총 금액: ${totalText || "-"}`);
-  if (noticeText) lines.push(`안내: ${noticeText}`);
-
-  return lines.join("\n");
-}
-
 function buildInquiryFormText() {
+  const rawLabel = getSelectedText("rawMin") || "-";
+  const finalMin = toInt(document.getElementById("finalMin")?.value, 0);
+  const pkgText = getSelectedText("package") || "-";
+  const editText = getSelectedText("editPoint") || "-";
+
+  const extras = getActiveExtraLabels();
+  const moment = getMomentCount();
+  const collab = getCollabCount();
+
   const fChannel = (document.getElementById("fChannel")?.value || "").trim();
   const fFinalLen = (document.getElementById("fFinalLen")?.value || "").trim();
   const fConcept = (document.getElementById("fConcept")?.value || "").trim();
   const fEtc = (document.getElementById("fEtc")?.value || "").trim();
 
+  let totalText = (document.getElementById("totalText")?.textContent || "").trim();
+  if (!totalText) totalText = "0원";
+  if (!/원\s*$/.test(totalText)) totalText = `${totalText}원`;
+
   const lines = [];
   lines.push("[문의 양식]");
+  lines.push(`- 원본 영상 길이: ${rawLabel}`);
+  lines.push(`- 희망 영상 길이: ${finalMin ? `${finalMin}분` : "-"}`);
+  lines.push(`- 희망 타입: ${pkgText}`);
+  lines.push(`- 편집점: ${editText}`);
+  lines.push(`- 추가 옵션: ${extras.length ? extras.join(", ") : "없음"}`);
+  lines.push(`- 시점: ${moment}개`);
+  lines.push(`- 합방 인원: ${collab}명`);
+  lines.push(`- 유튜브 채널 링크: ${fChannel || ""}`);
+  lines.push(`- 원본 영상 공유: ${fFinalLen || ""}`);
+  lines.push(`- 영상 콘셉트 및 레퍼런스 자료: ${fConcept || ""}`);
+  lines.push(`- 그 외 요구사항: ${fEtc || ""}`);
   lines.push("");
-  lines.push(`유튜브 채널 링크: ${fChannel || "-"}`);
-  lines.push(`원본 영상 공유: ${fFinalLen || "-"}`);
-  lines.push("");
-  lines.push("[영상 콘셉트 및 레퍼런스 자료]");
-  lines.push(fConcept || "-");
-  lines.push("");
-  lines.push("[그 외 요구사항]");
-  lines.push(fEtc || "-");
+  lines.push(`- 예상 총액: ${totalText}`);
 
   return lines.join("\n");
-}
-
-function buildFullCopyText() {
-  return `${buildCalcSummaryText()}\n\n--------------------------------------\n\n${buildInquiryFormText()}`.trim();
 }
 
 async function copyTextToClipboard(text) {
@@ -529,9 +457,9 @@ function bindFormUI() {
   const btnReset = document.getElementById("btnResetForm");
 
   btnCopy?.addEventListener("click", async () => {
-    const text = buildFullCopyText();
+    const text = buildInquiryFormText();
     const ok = await copyTextToClipboard(text);
-    setFormToast(ok ? "견적 계산기 + 문의 양식 복사 완료! 그대로 붙여넣기 하시면 돼요." : "복사에 실패했어요. 브라우저 권한을 확인해 주세요.");
+    setFormToast(ok ? "복사 완료! 그대로 붙여넣기 하시면 돼요." : "복사에 실패했어요. 브라우저 권한을 확인해 주세요.");
   });
 
   btnReset?.addEventListener("click", () => {
@@ -552,6 +480,7 @@ function bindCalcUI() {
   document.getElementById("extraToggles")?.addEventListener("click", (e) => {
     const chip = e.target.closest(".chip");
     if (!chip) return;
+
     const group = chip.getAttribute("data-group");
     if (group) {
       const all = document.querySelectorAll(`#extraToggles .chip[data-group="${group}"]`);
@@ -559,20 +488,12 @@ function bindCalcUI() {
         if (el !== chip) el.classList.remove("is-active");
       });
     }
+
     chip.classList.toggle("is-active");
     resetTotal();
   });
 
-  document.getElementById("collabBtns")?.addEventListener("click", (e) => {
-    const chip = e.target.closest(".chip");
-    if (!chip) return;
-    const all = document.querySelectorAll("#collabBtns .chip");
-    all.forEach((el) => el.classList.remove("is-active"));
-    chip.classList.add("is-active");
-    resetTotal();
-  });
-
-  ["rawMin", "finalMin", "package", "editPoint", "momentVal"].forEach((id) => {
+  ["rawMin", "finalMin", "package", "editPoint", "momentVal", "collabVal"].forEach((id) => {
     const el = document.getElementById(id);
     el?.addEventListener("input", resetTotal);
     el?.addEventListener("change", resetTotal);
@@ -582,30 +503,24 @@ function bindCalcUI() {
     const totalEl = document.getElementById("totalText");
     if (!totalEl) return;
 
-    if (typeof computeTotal === "function") {
-      const result = computeTotal();
-
-      if (!result?.ok) {
-        totalEl.textContent = result?.reason === "inquiry" ? "문의 필요" : "0원";
-      } else {
-        totalEl.textContent = typeof formatKRW === "function" ? formatKRW(result.total) : `${result.total || 0}원`;
-      }
+    const result = computeTotal();
+    if (!result?.ok) {
+      totalEl.textContent = result?.reason === "inquiry" ? "문의 필요" : "0원";
+    } else {
+      totalEl.textContent = formatKRW(result.total);
     }
 
-    if (typeof syncCalcToForm === "function") {
-      syncCalcToForm();
-    }
+    syncCalcToForm();
   });
 
   resetTotal();
 }
 
-async function initCalc() {
-  if (typeof loadCalcData === "function") {
-    await loadCalcData();
-  }
+async function initAll() {
+  loadStatus();
+  await loadCalcData();
   bindCalcUI();
   bindFormUI();
 }
 
-document.addEventListener("DOMContentLoaded", initCalc);
+document.addEventListener("DOMContentLoaded", initAll);

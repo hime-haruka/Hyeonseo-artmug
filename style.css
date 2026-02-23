@@ -135,7 +135,7 @@
 }
 
 .pret {
-    font-family: 'Pretendard', Courier, monospace;    
+    font-family: 'Pretendard', Courier, monospace !important;  
 }
 
 .surro {
@@ -353,7 +353,7 @@ div * {
 .pillField {
     background: #ffe28a;
     border-radius: 999px;
-    padding: 12px 14px;
+    padding: 8px 35px;
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -423,12 +423,13 @@ div * {
     padding: 16px;
     display: flex;
     align-items: start;
-    gap: 20px;
-    align-items: baseline;
+    gap: 40px;
 }
 
 .extraHead {
+    width: 100%;
     display:flex;
+    justify-content: space-between;
     align-items:center;
     gap: 12px;
     margin-bottom: 10px;
@@ -454,7 +455,7 @@ div * {
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    padding: 8px 25px;
+    padding: 8px 50px;
     border-radius: 12px;
     background: #ffedb8;
     border: 0;
@@ -479,10 +480,11 @@ div * {
 }
 
 /* lower line: moment + collab */
-.subLine{
+.subLine {
     margin-top: 10px;
     display:flex;
-    align-items:center;
+    justify-content: space-between;
+    align-items: center;
     gap: 10px;
     flex-wrap: wrap;
 }
@@ -499,7 +501,7 @@ div * {
 .collabWrap {
     display: flex;
     align-items: center;
-    padding: 8px 18px;
+    padding: 8px 45px;
     border-radius: 10px;
     background: #ffedb8;
 }
@@ -539,11 +541,11 @@ div * {
 }
 
 .bottomRow{
-  margin-top: 14px;
   display:grid;
   grid-template-columns: 1.2fr .8fr;
   gap: 14px;
   align-items:stretch;
+  padding: 0 18px;
 }
 
 .totalBox{
@@ -640,6 +642,7 @@ input[type="number"]{
     calc(100% - 12px) 50%;
     background-size: 7px 7px, 7px 7px;
     background-repeat:no-repeat;
+    font-family: 'Pretendard', Courier, monospace;
 }
 
 .totalLabel {
@@ -785,6 +788,7 @@ input[type="number"]{
   font-size: 12px;
   color: var(--text-secondary);
   line-height: 1.45;
+  padding-left: 16px;
 }
 
 @media (max-width: 720px){
@@ -796,4 +800,41 @@ input[type="number"]{
     line-height: 1.45;
     color: var(--text-secondary);
     margin-bottom: 10px;
+}
+
+.moment {
+    font-weight: 700;
+}
+
+.momentF {
+    border-radius: 10px;
+}
+
+/* autofill remove */
+.formInput,
+.formTextarea{
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: #fff2c9;
+  transition: box-shadow .18s ease, background-color .18s ease;
+}
+.formInput:focus,
+.formTextarea:focus{
+  background-color: #fff2c9;
+  box-shadow: 0 0 0 3px rgba(240,179,35,.35);
+}
+.formInput:not(:placeholder-shown),
+.formTextarea:not(:placeholder-shown){
+  background-color: #fff2c9;
+}
+.formInput:-webkit-autofill,
+.formInput:-webkit-autofill:hover,
+.formInput:-webkit-autofill:focus,
+.formTextarea:-webkit-autofill,
+.formTextarea:-webkit-autofill:hover,
+.formTextarea:-webkit-autofill:focus{
+  -webkit-text-fill-color: var(--text-primary);
+  -webkit-box-shadow: 0 0 0px 1000px #fff2c9 inset;
+          box-shadow: 0 0 0px 1000px #fff2c9 inset;
+  transition: background-color 9999s ease-out 0s;
 }

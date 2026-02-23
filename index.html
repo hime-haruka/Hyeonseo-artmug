@@ -39,10 +39,9 @@
                         <div class="row">
                             <div class="pillField">
                                 <div class="pillLabel">원본 영상 길이</div>
-                                <div class="rightWrap">
-                                    <input class="pillInput" id="rawMin" type="number" min="0" step="1" value="" />
-                                    <div class="pillUnit">분</div>
-                                </div>
+                                <select class="pillSelect" id="rawMin" aria-label="원본 영상 길이 구간 선택">
+                                  <option value="" selected>구간 선택</option>
+                                </select>
                             </div>
 
                             <div class="pillField">
@@ -58,10 +57,10 @@
                             <div class="pillField">
                                 <div class="pillLabel">희망 타입</div>
                                 <select class="pillSelect" id="package">
-                                <option value="basic">스탠다드</option>
-                                <option value="deluxe">디럭스</option>
-                                <option value="premium" selected>프리미엄</option>
-                                <option value="economy">알잘딱</option>
+                                    <option value="basic">스탠다드</option>
+                                    <option value="deluxe">디럭스</option>
+                                    <option value="premium" selected>프리미엄</option>
+                                    <option value="economy">알잘딱</option>
                                 </select>
                             </div>
 
@@ -80,25 +79,43 @@
                             <div class="extras">
                                 <div class="extraHead">
                                     <div class="chips pret" id="extraToggles">
-                                    <div class="chip" data-extra="포트폴리오 미공개">포트폴리오 비공개</div>
+                                    <div class="chip" data-extra="포트폴리오 비공개">포트폴리오 비공개</div>
                                     <div class="chip" data-extra="빠른 마감" data-group="rush">빠른 마감</div>
                                     <div class="chip" data-extra="우선 마감" data-group="rush">우선 마감</div>
-                                    <div class="chip" data-extra="추가 수정 1회">추가 수정 1회권</div>
-                                    </div>
                                 </div>
+                            </div>
                                 <div class="subLine pret">
-                                    <div class="counterChip" id="momentWrap" aria-label="시점 추가 수량">
-                                        <span>시점</span>
-                                        <span>[+<input class="momentInput" id="momentVal" type="number" min="0" step="1" value="0" inputmode="numeric">]</span>
-                                    </div>
+                                    <div class="pillField momentF" style="background:#ffedb8;">
+                                    <div class="pillLabel pret moment" style="font-size:18px;">시점</div>
+                                    <select class="pillSelect" id="momentVal" aria-label="시점 선택">
+                                        <option value="0" selected>0개</option>
+                                        <option value="1">1개</option>
+                                        <option value="2">2개</option>
+                                        <option value="3">3개</option>
+                                        <option value="4">4개</option>
+                                        <option value="5">5명</option>
+                                        <option value="6">6명</option>
+                                        <option value="7">7명</option>
+                                        <option value="8">8명</option>
+                                        <option value="9">9명</option>
+                                        <option value="10">10명</option>
+                                    </select>
+                                </div>
                                     <div class="collabWrap">
                                         <div class="subLabel pret">합방 인원 추가</div>
-                                        <div class="chips pret" id="collabBtns" aria-label="합방 인원 선택">
-                                            <div class="chip small" data-collab="1">1명</div>
-                                            <div class="chip small" data-collab="2">2명</div>
-                                            <div class="chip small" data-collab="3">3명</div>
-                                            <div class="chip small" data-collab="4">4명</div>
-                                            <div class="chip small" data-collab="5">5명</div>
+                                            <select class="pillSelect" id="collabVal" aria-label="합방 인원 선택">
+                                                <option value="0" selected>0명</option>
+                                                <option value="1">1명</option>
+                                                <option value="2">2명</option>
+                                                <option value="3">3명</option>
+                                                <option value="4">4명</option>
+                                                <option value="5">5명</option>
+                                                <option value="6">6명</option>
+                                                <option value="7">7명</option>
+                                                <option value="8">8명</option>
+                                                <option value="9">9명</option>
+                                                <option value="10">10명</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -115,7 +132,7 @@
                         </div>
 
                         <div class="notice" id="noticeText"></div>
-                        <p class="calcCopyNote pret">※ 여기에서 입력한 값은 아래 “문의 양식”에 자동으로 복사됩니다. (콘셉트/요구사항은 아래에서 작성해주세요.)</p>
+                        <p class="calcCopyNote pret">※ 여기에서 입력한 값은 아래 “문의 양식”에 자동으로 복사됩니다.</p>
 
                     </div>
                 </div>
@@ -143,7 +160,7 @@
                         <input class="formInput" id="fChannel" type="url" placeholder="링크를 작성해주세요." />
                         </div>
 
-                        <!-- 희망 최종 영상 길이 -->
+                        <!-- 원본 영상 공유 -->
                         <div class="formItem">
                         <div class="formLabel">원본 영상 공유</div>
                         <div class="formHint">
@@ -151,7 +168,7 @@
                             그 외에도 편하신 방법으로 공유해 주셔도 괜찮습니다.<br>
                             (작업 확정 후 공유해 주셔도 무방합니다.)
                         </div>
-                        <input class="formInput" id="fFinalLen" type="text" placeholder="" />
+                        <input class="formInput" id="fFinalLen" type="text" placeholder="드라이브 링크 등을 작성해주세요." />
                         </div>
 
                         <!-- 영상 콘셉트 및 레퍼런스 -->
