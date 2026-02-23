@@ -634,9 +634,7 @@ input[type="number"]{
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background-image:
-    linear-gradient(45deg, transparent 50%, rgba(60,43,31,.65) 50%),
-    linear-gradient(135deg, rgba(60,43,31,.65) 50%, transparent 50%);
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%27http://www.w3.org/2000/svg%27%20width%3D%2712%27%20height%3D%278%27%20viewBox%3D%270%200%2012%208%27%3E%3Cpath%20d%3D%27M1%201l5%205%205-5%27%20stroke%3D%27%23664b2e%27%20stroke-width%3D%272%27%20fill%3D%27none%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E");
     background-position:
     calc(100% - 18px) 50%,
     calc(100% - 12px) 50%;
@@ -841,32 +839,4 @@ input[type="number"]{
 
 #form {
     margin-bottom: 20px;
-}
-
-.formSelect,
-select {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-
-    background: #fff2c9;
-    padding-right: 36px;
-    position: relative;
-}
-
-.formSelect,
-select {
-    background-image: none;
-}
-
-.formSelect::after,
-select::after {
-    content: "▼";
-    font-size: 11px;
-    color: #664b2e;
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
 }
